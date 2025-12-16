@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D") no-repeat center center fixed;
+            background-size: cover;
+            backdrop-filter: blur(10px);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+            margin: 0 auto;
+            position: fixed;  /* Cambia sticky in fixed */
+            top: 0;  /* Assicurati che il contenitore sia fissato in cima */
+            left: 50%;
+            transform: translateX(-50%);  /* Centra il contenitore orizzontalmente */
+            z-index: 0;  /* Assicurati che stia sopra gli altri elementi */
+            padding-top: 20px;  /* Aggiungi un po' di spazio in cima se necessario */
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #FFD700;
+        }
+        .title-container {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            padding-bottom: 8px;
+        }
+        .movie-list-container {
+            max-width: 100%;
+            margin-top: 15px;
+            position: relative;
+        }
+        .movie-list {
+            display: flex;
+            overflow-x: hidden;
+            padding: 8px 0;
+            gap: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: #888 #333;
+            scroll-behavior: smooth;
+            width: 100%;
+        }
+        .movie {
+            min-width: 130px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .movie img {
+            width: 100%;
+            max-width: 130px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        }
+        .stars {
+            margin-top: 4px;
+            color: gold;
+        }
+        /*Login*/
+        .login-container {
+            width: 600px;
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        h2{
+            font-size:35px;
+            font-weight:bold;
+            margin-top:-20px;
+        }
+        p{
+            font-size:15px;
+        }
+        .login-container left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+        .login-container right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container divider {
+            width: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 10px 20px;
+        }
+        .input {
+            width: 80%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+        }
+        .login-container button {
+            width: 35%;
+            padding: 10px;
+            border: none;
+            border-radius: 200px;
+            background: #d9b907;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-container button:hover {
+            background: #dec435;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        .popup-content {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    width: 70%;
+    max-width: 800px;
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.popup-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 250px; /* Larghezza minima per garantire che l'immagine non si restringa */
+    margin-right: 20px; /* Spazio tra immagine/attori e testo */
+}
+
+.popup img {
+    width: 250px; /* Fissiamo la larghezza direttamente, senza percentuale */
+    max-width: 250px; /* Manteniamo il limite massimo */
+    border-radius: 8px;
+}
+
+.popupActors {
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Aggiustamento per dispositivi mobili */
+@media (max-width: 768px) {
+    .popup-content {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .popup-left {
+        margin-right: 0; /* Rimuoviamo il margine destro su schermi piccoli */
+        margin-bottom: 20px; /* Spazio sotto il blocco immagine/attori */
+    }
+    .popup img {
+        width: 250px; /* Manteniamo la dimensione anche su mobile */
+        max-width: 250px;
+    }
+}
+        .popup-text {
+            max-width: 500px;
+        }
+        .popup h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .popup-title-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .popup .close-btn:hover {
+            transform: scale(1.2);
+        }
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 1;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+        .scroll-left {
+            left: 8px;
+        }
+        .scroll-right {
+            right: 8px;
+        }
+        .scroll-btn i {
+            font-size: 1.5rem;
+        }
+        .scroll-btn:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+            transform: scale(1.1);
+            opacity: 0.9;
+            transform-origin: center;
+        }
+        .popup-content {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            width: 70%;
+            max-width: 800px;
+            color: white;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .popup-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 250px;
+            margin-right: 20px;
+        }
+
+        .popup img {
+            width: 250px;
+            max-width: 250px;
+            border-radius: 8px;
+        }
+
+        .popupActors {
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* Stile per gli attori cliccabili */
+        .actor-name {
+            cursor: pointer;
+            color: #FFD700; /* Colore dorato per distinguere gli attori */
+            margin-right: 5px; /* Spazio tra gli attori */
+        }
+
+        .actor-name:hover {
+            text-decoration: underline; /* Sottolineatura al passaggio del mouse */
+        }
+        /* Stile base per la ghiera circolare */
+        .gauge-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 10px auto;
+}
+
+.gauge {
+    /*transform: rotate(-90deg); /* Ruota il cerchio per iniziare da 12:00 */
+}
+
+.gauge-progress {
+    transition: stroke-dashoffset 1s ease; /* Animazione fluida */
+}
+
+.gauge-text {
+    font-size: 16px;
+    fill: #333;
+    text-anchor: middle; /* Centra il testo orizzontalmente */
+    dominant-baseline: middle; /* Centra il testo verticalmente */
+}
+
+
+
+/* PopupActors */
+.popupActor {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        .popupActor-content {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            width: 70%;
+            max-width: 800px;
+            color: white;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
+            overflow: hidden;
+        }
+
+        .popupActor-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 250px; /* Larghezza minima per garantire che l'immagine non si restringa */
+            margin-right: 20px; /* Spazio tra immagine/attori e testo */
+        }
+
+        .popupActor img {
+            width: 250px; /* Fissiamo la larghezza direttamente, senza percentuale */
+            max-width: 250px; /* Manteniamo il limite massimo */
+            border-radius: 8px;
+        }
+        .popup-movie-list-container {
+            max-width: 100%;
+            margin-top: 15px;
+            position: relative;
+        }
+        .popup-movie-list {
+            display: flex; /* Dispone gli elementi in orizzontale */
+            overflow-x: hidden; /* Abilita lo scorrimento orizzontale */
+            padding: 8px 0;
+            gap: 12px; /* Spazio tra i film */
+            scrollbar-width: thin; /* Barra di scorrimento sottile */
+            scrollbar-color: #888 #333; /* Colori della barra di scorrimento */
+            scroll-behavior: smooth; /* Scorrimento fluido */
+            width: 100%; /* Larghezza piena del contenitore */
+            max-width: 400pt;
+            box-sizing: border-box;
+        }
+
+        .popup-movie-list .movie {
+            min-width: 130px; /* Larghezza minima per ogni film */
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .popup-movie-list .movie img {
+            width: 100%;
+            max-width: 130px; /* Dimensione massima dell'immagine */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        }
+/* Aggiustamento per dispositivi mobili */
+@media (max-width: 768px) {
+    .popup-content {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .popup-left {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+    .popup img {
+        width: 250px;
+        max-width: 250px;
+    }
+}
+        
+        .loader{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D") no-repeat center center fixed;
+                background-size: cover;
+                backdrop-filter: blur(10px);
+                transition: opacity 0.75s, visibility 0.75s;
+            }
+            .hidden{
+                opacity: 0;
+                visibility: hidden;
+            }
+            .loader::after{
+                content:"";
+                width: 75px;
+                height: 75px;
+                border: 15px solid #dddddd;
+                border-top-color: #860000;
+                border-radius: 50%;
+                animation: loading 0.75s ease infinite;
+            }
+            @keyframes loading{
+                from{
+                    transform: rotate(0turn);
+                }
+                to{
+                    transform:rotate(1turn);
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginScreen">
+        <left><h2>Come accedere?</h2>
+        <p>Inserire un username compreso tra il valore 1 e il valore 1000 per poter completare l'accesso</p></left>
+        <divider></divider>
+        <right>
+            <h3>Login</h3>
+            <input class="input" type="text" placeholder="Username" id="username">
+            <button class="button" onclick="login()">Accedi</button>
+        </right>
+    </div>
+    <div class="loader hidden" id="spinner"></div>
+    <div class="content-container hidden" id="movieScreen">
+        <div class="user-name">
+            <span id="userGreeting">Ciao, Utente!</span>
+        </div>
+        <div class="title-container">
+            <h1>Movie Recommender System</h1>
+        </div>
+        <div class="movie-list-container">
+            <h2>Per Te</h2>
+            <button class="scroll-btn scroll-left" onclick="scrollList('movieList1', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="movie-list" id="movieList1"></div>
+            <button class="scroll-btn scroll-right" onclick="scrollList('movieList1', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="movie-list-container">
+            <h2 id="movieGenre"></h2>
+            <button class="scroll-btn scroll-left" onclick="scrollList('movieList2', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="movie-list" id="movieList2"></div>
+            <button class="scroll-btn scroll-right" onclick="scrollList('movieList2', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="movie-list-container">
+            <h2 id="movieActor"></h2>
+            <button class="scroll-btn scroll-left" onclick="scrollList('movieList3', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="movie-list" id="movieList3"></div>
+            <button class="scroll-btn scroll-right" onclick="scrollList('movieList3', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="movie-list-container">
+            <h2>Scopri di Più</h2>
+            <button class="scroll-btn scroll-left" onclick="scrollList('movieList4', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="movie-list" id="movieList4"></div>
+            <button class="scroll-btn scroll-right" onclick="scrollList('movieList4', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="movie-list-container">
+            <h2 id="movieSimilar"></h2>
+            <button class="scroll-btn scroll-left" onclick="scrollList('movieList5', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="movie-list" id="movieList5"></div>
+            <button class="scroll-btn scroll-right" onclick="scrollList('movieList5', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+<!-- Pop-up -->
+<div class="popup" id="popup">
+    <div class="popup-content">
+        <button class="close-btn" onclick="closePopup()">×</button>
+        <div class="popup-left">
+            <img id="popupImage" src="" alt="Movie Cover">
+            <p id="popupActors" style="margin-top: 10px; font-style: italic;"></p>
+        </div>
+        <div class="popup-title-container">
+            <h2 id="popupTitle">Titolo del Film</h2>
+            <div id="popupRating" class="stars"></div>
+            <div class="gauge-container">
+                <svg class="gauge" width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" stroke="#ddd" stroke-width="10" fill="none" />
+                    <circle class="gauge-progress" cx="50" cy="50" r="45" stroke="#4caf50" stroke-width="10" fill="none" stroke-dasharray="282.743" stroke-dashoffset="282.743" />
+                    <text class="gauge-text" x="50%" y="50%" text-anchor="middle" stroke="#51c5cf" stroke-width="1px" dy=".3em">0%</text>
+                </svg>
+            </div>
+            
+            <p id="popupDescription">Descrizione del film...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up Actors -->
+<div class="popup" id="popupActor">
+    <div class="popup-content">
+        <button class="close-btn" onclick="closePopupActor()">×</button>
+        <div class="popup-left">
+            <img id="popupActorImage" src="" alt="Movie Cover">
+        </div>
+        <div class="movie-list">
+            <div>
+                <h2 id="popupActorTitle">Nome Attore</h2>
+                <div class="popup-movie-list" id="movieListActor"></div>
+            </div>
+            <div id="popupActorRating" class="stars"></div>
+            <button class="scroll-btn scroll-left" onclick="scrollList('movieListActor', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="scroll-btn scroll-right" onclick="scrollList('movieListActor', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+    <script>
+        window.addEventListener("load", () => {
+            const loader = document.querySelector(".loader");
+            loader.classList.add("loader-hidden");
+            loader.addEventListener("transitionend", () => {
+                //document.body.removeChild(loader);
+            });
+        });
+        
+        const apiKey = "73c18ca6";
+        let movies = [];
+        
+        async function fetchMovieDataFromAPI(imdbID) {
+            const response = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}`);
+            const data = await response.json();
+        
+            if(data.Poster == "N/A"){
+                data.Poster = "https://motivatevalmorgan.com/wp-content/uploads/2016/06/default-movie.jpg"
+            }
+            return data;
+        }
+        function updateGauge(accuracy) {
+    let gaugeProgress = document.querySelector('.gauge-progress');
+    let gaugeText = document.querySelector('.gauge-text');
+    
+    // La lunghezza del cerchio (perimetro) = 2 * PI * r
+    let circumference = 2 * Math.PI * 45; // r = 45, il raggio del cerchio
+    
+    // Calcolare quanto deve essere spostato lo stroke-dashoffset in base alla precisione
+    let offset = circumference - (accuracy / 100) * circumference;
+    
+    // Aggiornare l'offset del cerchio per il riempimento
+    gaugeProgress.style.strokeDashoffset = offset;
+    
+    // Aggiungere il valore numerico al centro del cerchio
+    gaugeText.textContent = `${accuracy}%`;
+}
+
+        async function fetchMovieDataFromJSON(url) {
+            const response = await fetch(url);
+            const moviesJson = await response.json();
+            if (url === 'http://127.0.0.1:5000/api/getTopTenByGenre') {
+                document.getElementById('movieGenre').textContent = `Migliori film del genere "${moviesJson[0].genre}"`;
+            }
+            if (url === 'http://127.0.0.1:5000/api/getTopTenByActor') {
+                document.getElementById('movieActor').textContent = `Ti potrebbero piacere con "${moviesJson[0].actor}"`;
+            }
+            if (url === 'http://127.0.0.1:5000/api/getTopTen') {
+                console.log(response)
+            }
+            if (url === 'http://127.0.0.1:5000/api/similar_movies') {
+                document.getElementById('movieSimilar').textContent = `Perchè ti è piaciuto "${moviesJson[0].movie_base}"`;
+            }
+            return moviesJson;
+        }
+
+        async function fetchMovieDataFromJSONActor(url, actor) {
+            const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ actor: actor }) // Invia l'attore nel corpo della richiesta
+            });
+
+            if (response.ok) {
+                moviesJson = await response.json();  // Risultato della chiamata POST
+                console.log(moviesJson);
+                return moviesJson;
+            } else {
+                console.error('Errore nella richiesta POST');
+            }
+        }
+
+               
+        async function createMovieList(containerId, url) {
+            const container = document.getElementById(containerId);
+            const newMovies = await fetchMovieDataFromJSON(url);
+            movies = [...movies, ...newMovies];
+        
+            for (let movie of newMovies) {
+                const imdbID = movie.imdb_id;
+                const movieDataAPI = await fetchMovieDataFromAPI(imdbID);
+                const movieElement = document.createElement('div');
+                movieElement.classList.add('movie');
+                movieElement.innerHTML = `
+                    <img src="${movieDataAPI.Poster}" alt="${movieDataAPI.Title}" onclick="openPopup('${imdbID}')">
+                    <div>${movieDataAPI.Title}</div>
+                    <div class="stars">⭐ ${movie.rating}</div>
+                `;
+                container.appendChild(movieElement);
+            }
+        }
+
+        async function createMovieListActor(containerId, url, actor_name) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+
+            const newMovies = await fetchMovieDataFromJSONActor(url, actor_name);
+            console.log(newMovies)
+            const popupImage = document.getElementById('popupActorImage');
+            popupImage.src = newMovies.image;
+            popupImage.innerHTML = "";
+        
+            for (let movie of newMovies.movies) {
+                const imdbID = movie.imdb_id;
+                console.log(imdbID)
+                const movieDataAPI = await fetchMovieDataFromAPI("tt" + imdbID);
+                const movieElement = document.createElement('div');
+                movieElement.classList.add('movie');
+                movieElement.innerHTML = `
+                    <img src="${movieDataAPI.Poster}" alt="${movieDataAPI.Title}" onclick="openPopup('${imdbID}')">
+                    <div>${movieDataAPI.Title}</div>
+                `;
+                container.appendChild(movieElement);
+            }
+        }
+        
+        function openPopup(imdbID) {
+    const popup = document.getElementById('popup');
+    const popupImage = document.getElementById('popupImage');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupRating = document.getElementById('popupRating');
+    const popupDescription = document.getElementById('popupDescription');
+    const popupActors = document.getElementById('popupActors');
+    const popupAccuracy = document.getElementById('popupAccuracy')
+    const movieDJ = movies.find(movie => movie.imdb_id === imdbID);
+
+    if (!movieDJ) {
+        console.error("Film non trovato per imdbID:", imdbID);
+        return;
+    }
+
+    fetchMovieDataFromAPI(imdbID)
+        .then((movieDataAPI) => {
+            popupImage.src = movieDataAPI.Poster;
+            popupTitle.textContent = movieDataAPI.Title;
+            popupRating.textContent = "⭐ " + movieDJ.rating;
+            popupDescription.textContent = movieDJ.description;
+            //popupAccuracy.textContent = "Affinità: " + parseInt(movieDJ.affinity)+"%";
+            updateGauge(parseInt(movieDJ.affinity))
+            //updateGauge(1)
+
+            // Usa attori fittizi per il test
+            actors_copy = movieDJ.actors.split(',');
+
+            let actors = movieDJ.actors.split(',').map(actor => {
+                let actorName = actor.split('/').pop();
+                return actorName.replace(/_/g, ' ');
+            });            
+
+            // Pulisci il contenuto precedente
+            let cast = "";
+            if(actors != ""){
+                cast = "Attori: ";
+            }
+            popupActors.innerHTML = cast;
+
+            // Crea un elemento <span> per ogni attore
+            actors.forEach((actor, index) => {
+                const actorSpan = document.createElement('span');
+                actorSpan.classList.add('actor-name');
+                actorSpan.textContent = actor;
+                actorSpan.addEventListener('click', () => {
+                    //window.open(actors_copy[index],'_blank')
+                    openPopupActor(actor, actors_copy[index])
+                    console.log(actors_copy[index])
+                });
+
+                popupActors.appendChild(actorSpan);
+
+                if (index < actors.length - 1) {
+                    popupActors.appendChild(document.createTextNode(', '));
+                }
+            });
+
+            popup.style.display = "flex";
+        })
+        .catch(error => {
+            console.error("Errore nel caricamento dei dati del film:", error);
+        });
+        }
+
+        function openPopupActor(name, uri){
+            const popup = document.getElementById('popupActor');
+            const popupTitle = document.getElementById('popupActorTitle');
+            popupTitle.textContent = "Film di " + name;
+            createMovieListActor('movieListActor', 'http://127.0.0.1:5000/api/getActorInformation', name)
+            //const popupRating = document.getElementById('popupRating');
+            //const popupDescription = document.getElementById('popupDescription');
+            //const popupActors = document.getElementById('popupActors');
+            popup.style.display = "flex";
+        }
+        
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = "none";
+        }
+
+        function closePopupActor() {
+            const popup = document.getElementById('popupActor');
+            popup.style.display = "none";
+        }
+        
+        function scrollList(containerId, direction) {
+            const container = document.getElementById(containerId);
+            const scrollAmount = 130;
+            container.scrollLeft += direction * scrollAmount;
+        }
+        
+        function login() {
+            let username = document.getElementById("username").value.trim();
+            if (username === "") {
+                alert("Per favore, inserisci il tuo nome!");
+                return;
+            }
+        
+            const data = { userId: username };
+        
+            // Nascondi la schermata di login e mostra lo spinner
+            const loginScreen = document.getElementById('loginScreen');
+            const spinner = document.getElementById('spinner');
+            loginScreen.classList.add('hidden');
+            spinner.classList.remove('hidden');
+        
+            // Forza un aggiornamento del DOM per garantire che lo spinner appaia
+            setTimeout(() => {
+                fetch('http://127.0.0.1:5000/api/setUserId', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success POST:', data);
+        
+                    // Aggiorna il saluto dell'utente
+                    document.getElementById("userGreeting").textContent = `Ciao, ${username}!`;
+        
+                    // Crea un array di Promise per le chiamate GET
+                    const movieListPromises = [
+                        createMovieList('movieList1', 'http://127.0.0.1:5000/api/getTopTen'),
+                        createMovieList('movieList2', 'http://127.0.0.1:5000/api/getTopTenByGenre'),
+                        createMovieList('movieList3', 'http://127.0.0.1:5000/api/getTopTenByActor'),
+                        createMovieList('movieList4', 'http://127.0.0.1:5000/api/getScopriDiPiu'),
+                        createMovieList('movieList5', 'http://127.0.0.1:5000/api/similar_movies'),
+                    ];
+        
+                    // Attendi che tutte le chiamate GET siano completate
+                    return Promise.all(movieListPromises);
+                })
+                .then(() => {
+                    // Quando tutte le chiamate sono terminate, nascondi lo spinner e mostra la schermata dei film
+                    spinner.classList.add('hidden');
+                    document.getElementById('movieScreen').classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Errore nella connessione, per favore riprova.");
+                    // In caso di errore, nascondi lo spinner e mostra nuovamente il login
+                    spinner.classList.add('hidden');
+                    loginScreen.classList.remove('hidden');
+                });
+            }, 0); // Ritardo minimo per garantire il rendering
+        }
+        </script>
+</body>
+</html>
