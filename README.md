@@ -146,8 +146,7 @@ Risultati principali:
 
 ---
 
-## Valore per un Recruiter
-Questo progetto dimostra competenze in:
+## Argomenti trattati
 - Machine Learning applicato
 - Recommender Systems
 - Data Engineering
